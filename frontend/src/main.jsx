@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
-const API = import.meta.env.VITE_API_URL || "/api";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API}${path}`, {
