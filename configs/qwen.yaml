@@ -1,0 +1,19 @@
+model:
+  provider: huggingface
+  name: Qwen/Qwen2.5-0.5B-Instruct
+
+dataset:
+  type: json
+  path: datasets/alpaca.json
+
+trainer:
+  type: sft
+  method: lora
+
+training:
+  epochs: 1
+  learning_rate: 0.0002
+  max_length: 512
+
+device: auto
+output_dir: outputs

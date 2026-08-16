@@ -1,0 +1,12 @@
+model:
+  name: linear
+
+dataset:
+  name: json
+
+trainer:
+  name: gradient_descent
+
+training:
+  epochs: 50
+  learning_rate: 0.01

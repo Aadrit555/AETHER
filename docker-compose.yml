@@ -1,0 +1,68 @@
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      AETHER_DATA_DIR: /app/data
+      AETHER_MODEL_CACHE: /app/model-cache
+      AETHER_WORKER_MODE: worker
+    volumes:
+      - aether-data:/app/data
+      - aether-model-cache:/app/model-cache
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      AETHER_DATA_DIR: /app/data
+      AETHER_MODEL_CACHE: /app/model-cache
+      AETHER_WORKER_MODE: worker
+    command: ["python", "worker.py"]
+    volumes:
+      - aether-data:/app/data
+      - aether-model-cache:/app/model-cache
+    depends_on:
+      api:
+        condition: service_healthy
+    gpus: all
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "80"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      AETHER_DOMAIN: ${AETHER_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - frontend
+
+volumes:
+  aether-data:
+  aether-model-cache:
+  caddy-data:
+  caddy-config:
